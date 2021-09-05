@@ -1,4 +1,5 @@
-import mongoose, {Document, ObjectId} from 'mongoose'
+import mongoose, {Document, ObjectId} from 'mongoose';
+import {IBrand} from './IBrand';
 
 export interface IProduct extends Document{
     code?: Number,

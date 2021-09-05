@@ -1,7 +1,7 @@
 import { HttpException } from "../../common/HttpException"
 import { ISale} from "../../interfaces/ISale"
 
-export const validate = (body:ISale):void=>{
+export const validate = (body:any):void=>{
     let message = '';
     const products = body.products;
     if( products && !products.length )
