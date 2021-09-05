@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./epos-2.17.0.js"></script>
+    <title>Document</title>
+</head>
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing: border-box;
+    }
+    .content{
+        padding:30px 10px;
+        background-color: aliceblue;
+        display:flex;
+        flex-direction: row;
+        flex-wrap: no-wrap;
+        align-items: center;
+        align-items: flex-end;
+        align-content: stretch;
+        justify-content: center;
+        width: 180px;
+        height: 80px;
+        font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    }
+    .data{
+        flex:1;
+        background-color: red;
+    }
+    .image{
+        width: 70px;
+        height: 70px;
+        
+    }
+    .marca, .talla, .gender{
+        font-size: 9.5px;
+        background-color: aquamarine;
+        
+    }
+
+    .cost{
+        background-color: bisque;
+    }
+</style>
+<body>
+    <div class='content'>
+        <div class="data">
+            <div class="marca rotate">
+                <p>Brand: Aeropoastale</p>
+            </div>
+            <div class="talla rotate">
+                <p>Size: L</p>
+            </div>
+            <div class="gender rotate">
+                <p>Gender: Female</p>
+            </div>
+        </div>
+        <img class="image" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/1200px-Image_created_with_a_mobile_phone.png" />
+        <h3 class="cost">Bs 23.0</h3>
+        <button onclick="print()">print</button>
+    </div>
+    <script>
+        let ePosDev = new window.epson.ePOSDevice();
+ePosDevice.current = ePosDev;
+
+ePosDev.connect(printerIPAddress, printerPort, (data) => {
+  if (data === "OK") {
+    ePosDev.createDevice(
+      "local_printer",
+      ePosDev.DEVICE_TYPE_PRINTER,
+      { crypto: true, buffer: false },
+      (devobj, retcode) => {
+        if (retcode === "OK") {
+          printer.current = devobj;
+          setConnectionStatus(STATUS_CONNECTED);
+        } else {
+          throw retcode;
+        }
+      }
+    );
+  } else {
+    throw data;
+  }
+});
+
+const print = (text) => {
+  let prn = printer.current;
+  if (!prn) {
+    alert("Not connected to printer");
+    return;
+  }
+
+  prn.addText(text);
+  prn.addFeedLine(5);
+  prn.addCut(prn.CUT_FEED);
+
+  prn.send();
+};
+    </script>
+</body>
+</html>
