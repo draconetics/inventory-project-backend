@@ -12,7 +12,15 @@ const productSchema = new mongoose.Schema({
     brand: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Brand"
-      }
+      },
+    container: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Container"
+    },
+    state: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "State"
+    },
   },{  timestamps: true });
   
 

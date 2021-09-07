@@ -15,7 +15,7 @@ export const getProductList = async (
   ): Promise<void> => {
   
         try{
-            const products:IProducts = await Product.find({}).populate('brand');
+            const products:IProducts = await Product.find({}).populate('brand').sort({ _id : -1});
             let resp = {
                 status: 200,
                 message: "success",
@@ -44,7 +44,7 @@ export const getProductList = async (
             const imageId = await uploadFile(req.body.imageBase64, newProduct._id);
             newProduct.imageId = imageId;
             await newProduct.save();
-            await newProduct.populate('brand').execPopulate();
+            await newProduct.populate('brand').populate('container').execPopulate();
             res.status(201).json({status:201,message:"success",data:newProduct});
         }else{
             throw new HttpException(500, 'Image of product exist!');
@@ -64,7 +64,7 @@ export const getProductList = async (
       try{
         validateParamId(req.params.id);
         let id = mongoose.Types.ObjectId(req.params.id);
-        const productFound:IProduct|null = await Product.findOne({_id: id}).populate("brand");
+        const productFound:IProduct|null = await Product.findOne({_id: id}).populate("brand").populate("container").populate('state');
         if(productFound)
             res.status(200).json({status:200, message:"success", data:productFound});
         else
@@ -85,7 +85,7 @@ export const getProductList = async (
         if(regex.test(code) && !code){
           throw new HttpException(400, 'Id not found as a parameter.')
         }
-        const productFound:IProduct|null = await Product.findOne({code: code}).populate("brand");
+        const productFound:IProduct|null = await Product.findOne({code: code}).populate("brand").populate("container").populate('state');
         if(productFound)
             res.status(200).json({status:200, message:"success", data:productFound});
         else
@@ -103,24 +103,19 @@ export const getProductList = async (
       try{
         //validate(req.body)
         
-        const {_id,cost,gender,brand,imageBase64} = req.body;
+        const {_id,cost,gender,brand,imageBase64,container,state} = req.body;
         console.log(_id,cost,gender,brand);
-        let imageId = imageBase64.split('=')[2];
-        if(imageBase64.includes('base64')){
-            await deleteFile(_id);
-           
-              const newImageId = await uploadFile(imageBase64, _id);
-              imageId = newImageId;
-            
-        }
+        
         const productFound = await Product.findOneAndUpdate(
           { _id: _id },
           {
             $set: {
               cost,
               gender,
-              brand:brand._id,
-              imageId:imageId
+              brand,
+              imageId:imageBase64,
+              container,
+              state
             }
           },
           {
@@ -143,11 +138,12 @@ export const getProductList = async (
       try{
         validateParamId(req.params.id)
         let id = mongoose.Types.ObjectId(req.params.id);
-        await deleteFile(req.params.id);
         const productFound:IProduct|null = await Product.findByIdAndRemove(id)
         console.log(productFound)
-        if(productFound)
-            res.status(200).json({status:200, message:"success", data:productFound});
+        if(productFound){
+          await deleteFile(productFound.imageId+'');
+          res.status(200).json({status:200, message:"success", data:productFound});
+        }
         else
             next(new HttpException(500,"Not found element to delete"));
       }catch(e:any){
